@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[nop_splitstring_to_table]
+﻿CREATE FUNCTION [nop_splitstring_to_table]
 (
     @string NVARCHAR(MAX),
     @delimiter CHAR(1)
@@ -25,7 +25,7 @@ GO
 
 
 
-CREATE FUNCTION [dbo].[nop_getnotnullnotempty]
+CREATE FUNCTION [nop_getnotnullnotempty]
 (
     @p1 nvarchar(max) = null, 
     @p2 nvarchar(max) = null
@@ -44,7 +44,7 @@ GO
 
 
 
-CREATE FUNCTION [dbo].[nop_getprimarykey_indexname]
+CREATE FUNCTION [nop_getprimarykey_indexname]
 (
     @table_name nvarchar(1000) = null
 )
@@ -63,7 +63,7 @@ END
 GO
 
 
-CREATE FUNCTION [dbo].[nop_padright]
+CREATE FUNCTION [nop_padright]
 (
     @source INT, 
     @symbol NVARCHAR(MAX), 
@@ -77,7 +77,7 @@ END
 GO
 
 
-CREATE PROCEDURE [dbo].[ProductLoadAllPaged]
+CREATE PROCEDURE [ProductLoadAllPaged]
 (
 	@CategoryIds		nvarchar(MAX) = null,	--a list of category IDs (comma-separated list). e.g. 1,2,3
 	@ManufacturerId		int = 0,
@@ -210,7 +210,7 @@ BEGIN
 		SET @sql = '
 		INSERT INTO #KeywordProducts ([ProductId])
 		SELECT p.Id
-		FROM Product p with (NOLOCK)
+		FROM [Product] p with (NOLOCK)
 		WHERE '
 		IF @UseFullTextSearch = 1
 			SET @sql = @sql + 'CONTAINS(p.[Name], @Keywords) '
@@ -222,7 +222,7 @@ BEGIN
 		SET @sql = @sql + '
 		UNION
 		SELECT lp.EntityId
-		FROM LocalizedProperty lp with (NOLOCK)
+		FROM [LocalizedProperty] lp with (NOLOCK)
 		WHERE
 			lp.LocaleKeyGroup = N''Product''
 			AND lp.LanguageId = ' + ISNULL(CAST(@LanguageId AS nvarchar(max)), '0') + '
@@ -239,7 +239,7 @@ BEGIN
 			SET @sql = @sql + '
 			UNION
 			SELECT p.Id
-			FROM Product p with (NOLOCK)
+			FROM [Product] p with (NOLOCK)
 			WHERE '
 			IF @UseFullTextSearch = 1
 				SET @sql = @sql + 'CONTAINS(p.[ShortDescription], @Keywords) '
@@ -251,7 +251,7 @@ BEGIN
 			SET @sql = @sql + '
 			UNION
 			SELECT p.Id
-			FROM Product p with (NOLOCK)
+			FROM [Product] p with (NOLOCK)
 			WHERE '
 			IF @UseFullTextSearch = 1
 				SET @sql = @sql + 'CONTAINS(p.[FullDescription], @Keywords) '
@@ -264,7 +264,7 @@ BEGIN
 			SET @sql = @sql + '
 			UNION
 			SELECT lp.EntityId
-			FROM LocalizedProperty lp with (NOLOCK)
+			FROM [LocalizedProperty] lp with (NOLOCK)
 			WHERE
 				lp.LocaleKeyGroup = N''Product''
 				AND lp.LanguageId = ' + ISNULL(CAST(@LanguageId AS nvarchar(max)), '0') + '
@@ -279,7 +279,7 @@ BEGIN
 			SET @sql = @sql + '
 			UNION
 			SELECT lp.EntityId
-			FROM LocalizedProperty lp with (NOLOCK)
+			FROM [LocalizedProperty] lp with (NOLOCK)
 			WHERE
 				lp.LocaleKeyGroup = N''Product''
 				AND lp.LanguageId = ' + ISNULL(CAST(@LanguageId AS nvarchar(max)), '0') + '
@@ -296,7 +296,7 @@ BEGIN
 			SET @sql = @sql + '
 			UNION
 			SELECT p.Id
-			FROM Product p with (NOLOCK)
+			FROM [Product] p with (NOLOCK)
 			WHERE p.[ManufacturerPartNumber] = @OriginalKeywords '
 		END
 
@@ -306,7 +306,7 @@ BEGIN
 			SET @sql = @sql + '
 			UNION
 			SELECT p.Id
-			FROM Product p with (NOLOCK)
+			FROM [Product] p with (NOLOCK)
 			WHERE p.[Sku] = @OriginalKeywords '
 		END
 
@@ -315,15 +315,15 @@ BEGIN
 			--product tags (exact match)
 			SET @sql = @sql + '
 			UNION
-			SELECT pptm.Product_Id
-			FROM Product_ProductTag_Mapping pptm with(NOLOCK) INNER JOIN ProductTag pt with(NOLOCK) ON pt.Id = pptm.ProductTag_Id
+			SELECT pptm.[Product_Id]
+			FROM [Product_ProductTag_Mapping] pptm with(NOLOCK) INNER JOIN [ProductTag] pt with(NOLOCK) ON pt.[Id] = pptm.[ProductTag_Id]
 			WHERE pt.[Name] = @OriginalKeywords '
 
 			--localized product tags
 			SET @sql = @sql + '
 			UNION
-			SELECT pptm.Product_Id
-			FROM LocalizedProperty lp with (NOLOCK) INNER JOIN Product_ProductTag_Mapping pptm with(NOLOCK) ON lp.EntityId = pptm.ProductTag_Id
+			SELECT pptm.[Product_Id]
+			FROM [LocalizedProperty] lp with (NOLOCK) INNER JOIN [Product_ProductTag_Mapping] pptm with(NOLOCK) ON lp.[EntityId] = pptm.[ProductTag_Id]
 			WHERE
 				lp.LocaleKeyGroup = N''ProductTag''
 				AND lp.LanguageId = ' + ISNULL(CAST(@LanguageId AS nvarchar(max)), '0') + '
@@ -379,27 +379,27 @@ BEGIN
 	SET @sql = '
 	SELECT p.Id
 	FROM
-		Product p with (NOLOCK)'
+		[Product] p with (NOLOCK)'
 	
 	IF @CategoryIdsCount > 0
 	BEGIN
 		SET @sql = @sql + '
-		INNER JOIN Product_Category_Mapping pcm with (NOLOCK)
-			ON p.Id = pcm.ProductId'
+		INNER JOIN [Product_Category_Mapping] pcm with (NOLOCK)
+			ON p.Id = pcm.[ProductId]'
 	END
 	
 	IF @ManufacturerId > 0
 	BEGIN
 		SET @sql = @sql + '
-		INNER JOIN Product_Manufacturer_Mapping pmm with (NOLOCK)
-			ON p.Id = pmm.ProductId'
+		INNER JOIN [Product_Manufacturer_Mapping] pmm with (NOLOCK)
+			ON p.Id = pmm.[ProductId]'
 	END
 	
 	IF ISNULL(@ProductTagId, 0) != 0
 	BEGIN
 		SET @sql = @sql + '
-		INNER JOIN Product_ProductTag_Mapping pptm with (NOLOCK)
-			ON p.Id = pptm.Product_Id'
+		INNER JOIN [Product_ProductTag_Mapping] pptm with (NOLOCK)
+			ON p.Id = pptm.[Product_Id]'
 	END
 	
 	--searching by keywords
@@ -407,7 +407,7 @@ BEGIN
 	BEGIN
 		SET @sql = @sql + '
 		JOIN #KeywordProducts kp
-			ON  p.Id = kp.ProductId'
+			ON  p.Id = kp.[ProductId]'
 	END
 	
 	SET @sql = @sql + '
@@ -463,8 +463,8 @@ BEGIN
 					p.WarehouseId = ' + CAST(@WarehouseId AS nvarchar(max)) + ')
 				OR
 				(p.UseMultipleWarehouses > 0 AND
-					EXISTS (SELECT 1 FROM ProductWarehouseInventory [pwi]
-					WHERE [pwi].WarehouseId = ' + CAST(@WarehouseId AS nvarchar(max)) + ' AND [pwi].ProductId = p.Id))
+					EXISTS (SELECT 1 FROM [ProductWarehouseInventory] [pwi]
+					WHERE [pwi].WarehouseId = ' + CAST(@WarehouseId AS nvarchar(max)) + ' AND [pwi].[ProductId] = p.Id))
 			)'
 	END
 	
@@ -472,7 +472,7 @@ BEGIN
 	IF @ProductTypeId is not null
 	BEGIN
 		SET @sql = @sql + '
-		AND p.ProductTypeId = ' + CAST(@ProductTypeId AS nvarchar(max))
+		AND p.[ProductTypeId] = ' + CAST(@ProductTypeId AS nvarchar(max))
 	END
 	
 	--filter by "visible individually"
@@ -607,7 +607,7 @@ BEGIN
 	)
 	INSERT INTO #FilteredSpecsWithAttributes (SpecificationAttributeId, SpecificationAttributeOptionId)
 	SELECT sao.SpecificationAttributeId, fs.SpecificationAttributeOptionId
-    FROM #FilteredSpecs fs INNER JOIN SpecificationAttributeOption sao ON sao.Id = fs.SpecificationAttributeOptionId
+    FROM #FilteredSpecs fs INNER JOIN [SpecificationAttributeOption] sao ON sao.Id = fs.SpecificationAttributeOptionId
     ORDER BY sao.SpecificationAttributeId 
 
     DECLARE @SpecAttributesCount int	
@@ -628,7 +628,7 @@ BEGIN
             FETCH NEXT FROM cur_SpecificationAttributeOption INTO @SpecificationAttributeId, @SpecificationAttributeOptionId
             IF (@LastSpecificationAttributeId <> 0 AND @SpecificationAttributeId <> @LastSpecificationAttributeId OR @@FETCH_STATUS <> 0) 
 			    SET @sql = @sql + '
-        AND p.Id in (select psam.ProductId from [Product_SpecificationAttribute_Mapping] psam with (NOLOCK) where psam.AllowFiltering = 1 and psam.SpecificationAttributeOptionId IN (SELECT SpecificationAttributeOptionId FROM #FilteredSpecsWithAttributes WHERE SpecificationAttributeId = ' + CAST(@LastSpecificationAttributeId AS nvarchar(max)) + '))'
+        AND p.Id in (select psam.[ProductId] from [Product_SpecificationAttribute_Mapping] psam with (NOLOCK) where psam.AllowFiltering = 1 and psam.SpecificationAttributeOptionId IN (SELECT SpecificationAttributeOptionId FROM #FilteredSpecsWithAttributes WHERE SpecificationAttributeId = ' + CAST(@LastSpecificationAttributeId AS nvarchar(max)) + '))'
             SET @LastSpecificationAttributeId = @SpecificationAttributeId
 		IF @@FETCH_STATUS = 0 GOTO FOREACH
 		CLOSE cur_SpecificationAttributeOption
@@ -685,9 +685,9 @@ BEGIN
 		[ProductId] int NOT NULL
 	)
 	INSERT INTO #PageIndex ([ProductId])
-	SELECT ProductId
+	SELECT [ProductId]
 	FROM #DisplayOrderTmp
-	GROUP BY ProductId
+	GROUP BY [ProductId]
 	ORDER BY min([Id])
 
 	--total records
@@ -700,7 +700,7 @@ BEGIN
 		p.*
 	FROM
 		#PageIndex [pi]
-		INNER JOIN Product p with (NOLOCK) on p.Id = [pi].[ProductId]
+		INNER JOIN [Product] p with (NOLOCK) on p.Id = [pi].[ProductId]
 	WHERE
 		[pi].IndexId > @PageLowerBound AND 
 		[pi].IndexId < @PageUpperBound
@@ -712,7 +712,7 @@ END
 GO
 
 
-CREATE PROCEDURE [dbo].[ProductTagCountLoadAll]
+CREATE PROCEDURE [ProductTagCountLoadAll]
 (
 	@StoreId int
 )
@@ -721,13 +721,13 @@ BEGIN
 	SET NOCOUNT ON
 	
 	SELECT pt.Id as [ProductTagId], COUNT(p.Id) as [ProductCount]
-	FROM ProductTag pt with (NOLOCK)
-	LEFT JOIN Product_ProductTag_Mapping pptm with (NOLOCK) ON pt.[Id] = pptm.[ProductTag_Id]
-	LEFT JOIN Product p with (NOLOCK) ON pptm.[Product_Id] = p.[Id]
+	FROM [ProductTag] pt with (NOLOCK)
+	LEFT JOIN [Product_ProductTag_Mapping] pptm with (NOLOCK) ON pt.[Id] = pptm.[ProductTag_Id]
+	LEFT JOIN [Product] p with (NOLOCK) ON pptm.[Product_Id] = p.[Id]
 	WHERE
 		p.[Deleted] = 0
-		AND p.Published = 1
-		AND (@StoreId = 0 or (p.LimitedToStores = 0 OR EXISTS (
+		AND p.[Published] = 1
+		AND (@StoreId = 0 or (p.[LimitedToStores] = 0 OR EXISTS (
 			SELECT 1 FROM [StoreMapping] sm with (NOLOCK)
 			WHERE [sm].EntityId = p.Id AND [sm].EntityName = 'Product' and [sm].StoreId=@StoreId
 			)))
@@ -736,7 +736,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE [dbo].[FullText_IsSupported]
+CREATE PROCEDURE [FullText_IsSupported]
 AS
 BEGIN	
 	EXEC('
@@ -753,7 +753,7 @@ GO
 
 
 
-CREATE PROCEDURE [dbo].[FullText_Enable]
+CREATE PROCEDURE [FullText_Enable]
 AS
 BEGIN
 	--create catalog
@@ -766,26 +766,26 @@ BEGIN
 	SET @create_index_text = '
 	IF NOT EXISTS (SELECT 1 FROM sys.fulltext_indexes WHERE object_id = object_id(''[Product]''))
 		CREATE FULLTEXT INDEX ON [Product]([Name], [ShortDescription], [FullDescription])
-		KEY INDEX [' + dbo.[nop_getprimarykey_indexname] ('Product') +  '] ON [nopCommerceFullTextCatalog] WITH CHANGE_TRACKING AUTO'
+		KEY INDEX [' + [nop_getprimarykey_indexname] ('Product') +  '] ON [nopCommerceFullTextCatalog] WITH CHANGE_TRACKING AUTO'
 	EXEC(@create_index_text)
 	
 	SET @create_index_text = '
 	IF NOT EXISTS (SELECT 1 FROM sys.fulltext_indexes WHERE object_id = object_id(''[LocalizedProperty]''))
 		CREATE FULLTEXT INDEX ON [LocalizedProperty]([LocaleValue])
-		KEY INDEX [' + dbo.[nop_getprimarykey_indexname] ('LocalizedProperty') +  '] ON [nopCommerceFullTextCatalog] WITH CHANGE_TRACKING AUTO'
+		KEY INDEX [' + [nop_getprimarykey_indexname] ('LocalizedProperty') +  '] ON [nopCommerceFullTextCatalog] WITH CHANGE_TRACKING AUTO'
 	EXEC(@create_index_text)
 
 	SET @create_index_text = '
 	IF NOT EXISTS (SELECT 1 FROM sys.fulltext_indexes WHERE object_id = object_id(''[ProductTag]''))
 		CREATE FULLTEXT INDEX ON [ProductTag]([Name])
-		KEY INDEX [' + dbo.[nop_getprimarykey_indexname] ('ProductTag') +  '] ON [nopCommerceFullTextCatalog] WITH CHANGE_TRACKING AUTO'
+		KEY INDEX [' + [nop_getprimarykey_indexname] ('ProductTag') +  '] ON [nopCommerceFullTextCatalog] WITH CHANGE_TRACKING AUTO'
 	EXEC(@create_index_text)
 END
 GO
 
 
 
-CREATE PROCEDURE [dbo].[FullText_Disable]
+CREATE PROCEDURE [FullText_Disable]
 AS
 BEGIN
 	EXEC('
@@ -813,7 +813,7 @@ END
 GO
 
 
-CREATE PROCEDURE [dbo].[LanguagePackImport]
+CREATE PROCEDURE [LanguagePackImport]
 (
 	@LanguageId int,
 	@XmlPackage xml,
@@ -880,7 +880,7 @@ END
 GO
 
 
-CREATE PROCEDURE [dbo].[DeleteGuests]
+CREATE PROCEDURE [DeleteGuests]
 (
 	@OnlyWithoutShoppingCart bit = 1,
 	@CreatedFromUtc datetime,
@@ -951,7 +951,7 @@ END
 GO
 
 
-CREATE PROCEDURE [dbo].[CategoryLoadAllPaged]
+CREATE PROCEDURE [CategoryLoadAllPaged]
 (
     @ShowHidden         BIT = 0,
     @Name               NVARCHAR(MAX) = NULL,
@@ -988,10 +988,10 @@ BEGIN
 
     --get category tree
     ;WITH [CategoryTree]
-    AS (SELECT [Category].[Id] AS [Id], dbo.[nop_padright] ([Category].[DisplayOrder], '0', @lengthOrder) + '-' + dbo.[nop_padright] ([Category].[Id], '0', @lengthId) AS [Order]
+    AS (SELECT [Category].[Id] AS [Id], [nop_padright] ([Category].[DisplayOrder], '0', @lengthOrder) + '-' + [nop_padright] ([Category].[Id], '0', @lengthId) AS [Order]
         FROM [Category] WHERE [Category].[ParentCategoryId] = 0
         UNION ALL
-        SELECT [Category].[Id] AS [Id], [CategoryTree].[Order] + '|' + dbo.[nop_padright] ([Category].[DisplayOrder], '0', @lengthOrder) + '-' + dbo.[nop_padright] ([Category].[Id], '0', @lengthId) AS [Order]
+        SELECT [Category].[Id] AS [Id], [CategoryTree].[Order] + '|' + [nop_padright] ([Category].[DisplayOrder], '0', @lengthOrder) + '-' + [nop_padright] ([Category].[Id], '0', @lengthId) AS [Order]
         FROM [Category]
         INNER JOIN [CategoryTree] ON [CategoryTree].[Id] = [Category].[ParentCategoryId])
     INSERT INTO #OrderedCategoryIds ([CategoryId])

@@ -145,26 +145,26 @@ GO
 CREATE NONCLUSTERED INDEX [IX_Product_SubjectToAcl] ON [Product] ([SubjectToAcl] ASC)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_Product_Category_Mapping_IsFeaturedProduct] ON [Product_Category_Mapping] (IsFeaturedProduct ASC)
+CREATE NONCLUSTERED INDEX [IX_Product_Category_Mapping_IsFeaturedProduct] ON [Product_Category_Mapping] ([IsFeaturedProduct] ASC)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_Product_Manufacturer_Mapping_IsFeaturedProduct] ON [Product_Manufacturer_Mapping] (IsFeaturedProduct ASC)
+CREATE NONCLUSTERED INDEX [IX_Product_Manufacturer_Mapping_IsFeaturedProduct] ON [Product_Manufacturer_Mapping] ([IsFeaturedProduct] ASC)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_Customer_CustomerRole_Mapping_Customer_Id] ON [Customer_CustomerRole_Mapping] (Customer_Id ASC)
+CREATE NONCLUSTERED INDEX [IX_Customer_CustomerRole_Mapping_Customer_Id] ON [Customer_CustomerRole_Mapping] ([Customer_Id] ASC)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_Product_Delete_Id] ON [Product] (Deleted ASC, Id ASC)
+CREATE NONCLUSTERED INDEX [IX_Product_Delete_Id] ON [Product] ([Deleted] ASC, Id ASC)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_GetLowStockProducts] ON [Product] (Deleted ASC, VendorId ASC, ProductTypeId ASC, ManageInventoryMethodId ASC, MinStockQuantity ASC, UseMultipleWarehouses ASC)
+CREATE NONCLUSTERED INDEX [IX_GetLowStockProducts] ON [Product] ([Deleted] ASC, [VendorId] ASC, [ProductTypeId] ASC, [ManageInventoryMethodId] ASC, [MinStockQuantity] ASC, [UseMultipleWarehouses] ASC)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_QueuedEmail_SentOnUtc_DontSendBeforeDateUtc_Extended] ON [dbo].[QueuedEmail] ([SentOnUtc], [DontSendBeforeDateUtc]) INCLUDE ([SentTries])
+CREATE NONCLUSTERED INDEX [IX_QueuedEmail_SentOnUtc_DontSendBeforeDateUtc_Extended] ON [QueuedEmail] ([SentOnUtc], [DontSendBeforeDateUtc]) INCLUDE ([SentTries])
 GO
 
-CREATE NONCLUSTERED INDEX [IX_Product_VisibleIndividually_Published_Deleted_Extended] ON [dbo].[Product] ([VisibleIndividually],[Published],[Deleted]) INCLUDE ([Id],[AvailableStartDateTimeUtc],[AvailableEndDateTimeUtc])
+CREATE NONCLUSTERED INDEX [IX_Product_VisibleIndividually_Published_Deleted_Extended] ON [Product] ([VisibleIndividually],[Published],[Deleted]) INCLUDE ([Id],[AvailableStartDateTimeUtc],[AvailableEndDateTimeUtc])
 GO
 
-CREATE NONCLUSTERED INDEX [IX_Category_Deleted_Extended] ON [dbo].[Category] ([Deleted]) INCLUDE ([Id],[Name],[SubjectToAcl],[LimitedToStores],[Published])
+CREATE NONCLUSTERED INDEX [IX_Category_Deleted_Extended] ON [Category] ([Deleted]) INCLUDE ([Id],[Name],[SubjectToAcl],[LimitedToStores],[Published])
 GO
